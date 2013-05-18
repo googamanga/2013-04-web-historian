@@ -3,9 +3,24 @@
 <head>
   <link rel="stylesheet" type="text/css" href="styles.css" />
 </head>
+  <script>
+    $('form').submit(function(){
+      var value = $('input').val();
+      $.ajax({
+        type: "POST",
+        url: "/",
+        data: value,
+        success: function(){
+          console.log("sent data:", value);
+        }
+      });
+    });
+  </script>
 <body>
   <form method="POST">
+    <span>Please insert web url:<span>
     <input type="input" name="url"></input>
+    <input type="submit"></input>
   </form>
 </body>
 </html>
