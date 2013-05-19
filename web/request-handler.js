@@ -2,6 +2,8 @@ exports.datadir = __dirname + "data/sites.txt"; // tests will need to override t
 var fs = require('fs'), returnCode = 404;
 var querystring = require('querystring');
 var url = require('url');
+var downloader = require('../workers/lib/html-fetcher-helpers.js');
+
 
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",
@@ -11,11 +13,11 @@ var defaultCorsHeaders = {
 };
 
 exports.handleRequest = function (request, response) {
+
   if (request.url === '/styles.css') {
     returnCode = 200;
     defaultCorsHeaders["Content-Type"] = "text/css";
     response.writeHead(returnCode, defaultCorsHeaders);
-    // console.log(__dirname + '/public/styles.css');
     fs.readFile(__dirname + '/public/styles.css','utf8',function (err, data) {
       if (err) throw err;
       response.end(data);
@@ -54,6 +56,7 @@ exports.handleRequest = function (request, response) {
         response.end('/'+siteURl+'/');
       } else {
         console.log("INSIDE 404");
+        console.log(request.url);
         response.writeHead(404, defaultCorsHeaders);
         response.end();
       }
@@ -69,11 +72,13 @@ exports.handleRequest = function (request, response) {
       request.on('end', function() {
         var data = querystring.parse(fullBody);
         console.log("exports.datadir:", exports.datadir);
-        fs.writeFileSync(exports.datadir, data['url'] + "\n");  //upgrade to async later
+        fs.appendFile('/Users/hackreactor/code/googamanga/2013-04-web-historian/data/sites.txt', data['url'] + "\n");  //upgrade to async later
+        downloader.downloadUrls(data['url']);
       });
 
-    returnCode = 201;
+    returnCode = 302;
     defaultCorsHeaders["Content-Type"] = "text/html";
+    defaultCorsHeaders["Location"] = "/";
     response.writeHead(returnCode, defaultCorsHeaders);
     response.end();
     return;
